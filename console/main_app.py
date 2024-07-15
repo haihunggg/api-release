@@ -41,7 +41,6 @@ try:
     resp = requests.get("http://host.docker.internal:2024/api/warnings").json()
     # resp = {'3a066711-48cb-71cf-17c8-5288f370c008': {'Database': 'MinvoiceCloud', 'Host': '103.61.122.194', 'Password': 'Minvoice@123', 'Port': '5432', 'User ID': 'minvoice'}}
     out = defaultdict(list)
-    logger.info(resp)
 
     for tenant_id, conn_str in resp.items():
         out[tuple(conn_str.items())].append(tenant_id)
@@ -111,7 +110,7 @@ try:
         data = list(ans.to_dict(orient="index").values())
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
-        logger.info("ghi file thanh cong")
+
 
     # if len(df) == 0:
     #     engine = create_engine(Config.DATABASE_URI)
