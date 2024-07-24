@@ -6,7 +6,7 @@ import json
 import psycopg2
 from flask import jsonify, Flask, request
 from config import Config
-from flask_jwt_extended import jwt_required, JWTManager
+from flask_jwt_extended import jwt_required, JWTManager, create_access_token, get_jwt, decode_token
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "hungth_minvoice@123"  # Replace with a strong secret
@@ -15,41 +15,52 @@ jwt = JWTManager(app)
 app.config.from_object(Config)
 
 
+@app.route("/api/token")
+def get_token():
+    access_token = create_access_token(identity=app.config["JWT_SECRET_KEY"])
+    return jsonify(access_token=access_token)
+
+
 @app.route("/api/count")
-# @jwt_required()
+@jwt_required()
 def count_sendinginvoices():
-    # start, end
-    start_date = request.args.get('start')
-    end_date = request.args.get('end')
+    try:
+        token = get_jwt()
 
-    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
-    end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+        # start, end
+        start_date = request.args.get('start')
+        end_date = request.args.get('end')
 
-    error_files = os.listdir(Config.ERROR_INVOICE_FOLDER)
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-    ans = []
+        error_files = os.listdir(Config.ERROR_INVOICE_FOLDER)
 
-    for json_file in error_files:
-        json_path = os.path.join(Config.ERROR_INVOICE_FOLDER, json_file)
-        date_string = json_file.split('_')[0]
-        date_format = "%Y%m%d"
-        date_obj = datetime.strptime(date_string, date_format).date()
+        ans = []
 
-        if start_date_obj <= date_obj <= end_date_obj:
-            with open(json_path, encoding="utf8") as jf:
-                res = json.load(jf)
-                ans.extend(res)
+        for json_file in error_files:
+            json_path = os.path.join(Config.ERROR_INVOICE_FOLDER, json_file)
+            date_string = json_file.split('_')[0]
+            date_format = "%Y%m%d"
+            date_obj = datetime.strptime(date_string, date_format).date()
 
-    count_taxcodes = len(set(x["Taxcode"] for x in ans))
+            if start_date_obj <= date_obj <= end_date_obj:
+                with open(json_path, encoding="utf8") as jf:
+                    res = json.load(jf)
+                    ans.extend(res)
 
-    companies = [
-        f'{company_info["Taxcode"]} - {company_info["SellerLegalName"]}'
-        for company_info in ans
-    ]
+        count_taxcodes = len(set(x["TaxCode"] for x in ans))
 
-    result = dict(Counter(companies))
+        companies = [
+            f'{company_info["TaxCode"]} - {company_info["SellerLegalName"]}'
+            for company_info in ans
+        ]
 
-    return jsonify({"so_luong_mst": count_taxcodes, "chi_tiet": result})
+        result = dict(Counter(companies))
+
+        return jsonify({"so_luong_mst": count_taxcodes, "chi_tiet": result})
+    except Exception as e:
+        return jsonify(msg=str(e))
 
 
 @app.route("/api/warnings", methods=["GET"])
