@@ -6,10 +6,11 @@ import json
 import psycopg2
 from flask import jsonify, Flask, request
 from config import Config
-from flask_jwt_extended import jwt_required, JWTManager, create_access_token, get_jwt, decode_token
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt
 
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = "hungth_minvoice@123"  # Replace with a strong secret
+# Replace with a strong secret
+app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
 jwt = JWTManager(app)
 
 app.config.from_object(Config)
