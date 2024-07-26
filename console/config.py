@@ -7,3 +7,4 @@ class Config:
     encoded_password = quote_plus(password)
     DATABASE_URI = f'postgresql://{user}:{encoded_password}@103.61.122.194:5432/MinvoiceCloud'
     ERROR_INVOICE_FOLDER = "error_invoice"
+    APP_LOG_FOLDER = "applog"

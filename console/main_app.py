@@ -16,7 +16,9 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler("app.log")
+os.makedirs(Config.APP_LOG_FOLDER, exist_ok=True)
+
+file_handler = logging.FileHandler(os.path.join(Config.APP_LOG_FOLDER, "applog.txt"))
 file_handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s")
 file_handler.setFormatter(formatter)

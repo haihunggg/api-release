@@ -1,0 +1,4 @@
+2024-07-26 10:14:00,239 - INFO - main_app.py:75 - Starting the application
+2024-07-26 10:14:26,215 - INFO - main_app.py:137 - error db number: 0
+
+2024-07-26 10:14:26,389 - INFO - main_app.py:154 - done
