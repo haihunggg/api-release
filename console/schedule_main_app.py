@@ -5,20 +5,23 @@ import subprocess
 from datetime import datetime
 import sys
 import threading
+from config import Config
 
 
 def delete_app_log():
     try:
-        os.remove("app.log")
+        os.remove(os.path.join(Config.APP_LOG_FOLDER,'applog.txt'))
     except FileNotFoundError:
         pass
     except Exception:
-        traceback.print_exc()
+        # traceback.print_exc()
+        pass
 
 
 def delete_app_log_loop():
     while True:
         day = 60*60*24
+        day = 80
         time.sleep(day*3)
         delete_app_log()
 
@@ -66,7 +69,7 @@ def sleep_on_first_run():
 def main():
     sleep_on_first_run()
     while True:
-        # job()
+        job()
         save_check_point()
         time.sleep(SEC_INTERVAL)
 

@@ -7,7 +7,8 @@ import json
 import psycopg2
 from flask import jsonify, Flask, request
 from config import Config
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt, decode_token
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager
+from constants import *
 
 app = Flask(__name__)
 
