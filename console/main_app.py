@@ -1,6 +1,5 @@
 import json
 
-import requests
 import psycopg2
 import pandas as pd
 import time
@@ -12,11 +11,15 @@ from sqlalchemy import create_engine
 from constants import *
 from datetime import datetime as dt
 import logging
+from telegram_ import send_telegram_message
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-file_handler = logging.FileHandler("app.log")
+os.makedirs(Config.APP_LOG_FOLDER, exist_ok=True)
+
+file_handler = logging.FileHandler(os.path.join(Config.APP_LOG_FOLDER, "applog.txt"))
+
 file_handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s")
 file_handler.setFormatter(formatter)
@@ -144,6 +147,8 @@ try:
         data = list(ans.to_dict(orient="index").values())
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+
+        send_telegram_message('6720464969', file_path)
 
     # if len(df) == 0:
     #     engine = create_engine(Config.DATABASE_URI)

@@ -1,3 +1,4 @@
+import traceback
 import os
 from collections import Counter
 from datetime import datetime
@@ -6,14 +7,22 @@ import json
 import psycopg2
 from flask import jsonify, Flask, request
 from config import Config
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt, decode_token
 
 app = Flask(__name__)
+
 # Replace with a strong secret
 app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
 jwt = JWTManager(app)
 
 app.config.from_object(Config)
+
+
+@jwt.invalid_token_loader
+def custom_message(*args, **kwargs):
+    return jsonify({
+        "msg": "Token không đúng. Vui lòng kiểm tra lại"
+    })
 
 
 @app.route("/api/token")
@@ -26,8 +35,6 @@ def get_token():
 @jwt_required()
 def count_sendinginvoices():
     try:
-        token = get_jwt()
-
         # start, end
         start_date = request.args.get('start')
         end_date = request.args.get('end')
@@ -60,7 +67,10 @@ def count_sendinginvoices():
         result = dict(Counter(companies))
 
         return jsonify({"so_luong_mst": count_taxcodes, "chi_tiet": result})
+    except KeyError:
+        return jsonify(msg="Missing identity in token"), 400
     except Exception as e:
+        traceback.print_exc()
         return jsonify(msg=str(e))
 
 
