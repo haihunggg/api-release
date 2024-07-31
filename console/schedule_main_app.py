@@ -6,6 +6,7 @@ from datetime import datetime
 import sys
 import threading
 from config import Config
+import atexit
 
 
 def delete_app_log():
@@ -51,7 +52,7 @@ def job():
     subprocess.run([sys.executable, "main_app.py"])
 
 
-SEC_INTERVAL = 60
+SEC_INTERVAL = 30
 
 
 def sleep_on_first_run():
@@ -69,9 +70,20 @@ def sleep_on_first_run():
 def main():
     sleep_on_first_run()
     while True:
-        job()
-        save_check_point()
-        time.sleep(SEC_INTERVAL)
+        try:
+            job()
+            save_check_point()
+            time.sleep(SEC_INTERVAL)
+        except KeyboardInterrupt:
+            save_check_point()
+            break
 
 
 main()
+
+def exit_handler():
+    save_check_point()
+
+
+atexit.register(exit_handler)
+
